@@ -1,0 +1,119 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+  }
+  
+  h1 {
+    height: 9vh;
+    background: #2D3C59;
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  #Cont {
+    height: 91vh;
+    display: flex;
+  }
+  
+  #leaderboard {
+    width: 60%;
+    background: #BBE0EF;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+  }
+  
+  /* #addStudent {
+    width: 40%;
+    background: #C5D89D;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+  } */
+
+  #addStudent {
+    width: 40%;
+    background: #C5D89D;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+
+    overflow-y: auto;   /* 🔥 enables scrolling */
+}
+
+  
+  .filter {
+    width: 80%;
+    background: #FF937E;
+    border-radius: 12px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+    margin-bottom: 15px;
+  }
+  
+  .showData {
+    width: 80%;
+    background: #E6CFA9;
+    border-radius: 16px;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    overflow-y: auto;
+  }
+  
+  .IndividualStudent {
+    background: #B6CEB4;
+    border-radius: 14px;
+    padding: 15px;
+    display: flex;
+    justify-content: space-between;
+  }
+  
+  .studentInput {
+    background: #9E3B3B;
+    width: 90%;
+    border-radius: 12px;
+    padding: 10px;
+    display: flex;
+    gap: 10px;
+    margin: 15px 0;
+  }
+  
+  .studentInput input {
+    flex: 1;
+    padding: 8px;
+    border-radius: 6px;
+    border: none;
+  }
+  
+  .studentInput button {
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+  }
+  
+  .studentDetailsContainer {
+    width: 90%;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .student {
+    background: #8CA9FF;
+    padding: 10px;
+    border-radius: 10px;
+  }
+  
