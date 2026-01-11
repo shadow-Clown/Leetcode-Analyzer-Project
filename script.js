@@ -1,3 +1,5 @@
+/* ================= ELEMENTS ================= */
+
 const nameInput = document.querySelector("#name");
 const usernameInput = document.querySelector("#username");
 const addBtn = document.querySelector("#add");
@@ -6,6 +8,8 @@ const excelInput = document.querySelector("#excelFile");
 const showStudentContainer = document.querySelector(".studentDetailsContainer");
 const showDataCont = document.querySelector(".showData");
 const filterSelect = document.querySelector("#filter");
+
+/* ================= STATE ================= */
 
 let students = [];
 
@@ -22,7 +26,7 @@ async function addManualStudent() {
   const username = usernameInput.value.trim();
 
   if (!name || !username) {
-    alert("Fill all fields");
+    alert("Enter name and username");
     return;
   }
 
@@ -31,17 +35,20 @@ async function addManualStudent() {
     return;
   }
 
-  students.push({ name, username, stats: null });
+  students.push({
+    name,
+    username,
+    stats: null
+  });
 
   nameInput.value = "";
   usernameInput.value = "";
 
   renderStudentList();
-  await loadStats();
-  applyFilter();
+  await loadStats();       // ✅ always load
 }
 
-/* ================= EXCEL UPLOAD (FIXED) ================= */
+/* ================= EXCEL UPLOAD ================= */
 
 async function handleExcelUpload(e) {
   const file = e.target.files[0];
@@ -57,21 +64,21 @@ async function handleExcelUpload(e) {
     const rows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
 
     rows.forEach(row => {
-      // 🔥 Normalize keys
-      const normalizedRow = {};
-      for (let key in row) {
-        normalizedRow[key.toLowerCase().trim()] = row[key];
-      }
+      // normalize headers
+      const normalized = {};
+      Object.keys(row).forEach(k => {
+        normalized[k.toLowerCase().trim()] = row[k];
+      });
 
       const name =
-        normalizedRow["student name"] ||
-        normalizedRow["name"] ||
-        normalizedRow["full name"];
+        normalized["student name"] ||
+        normalized["name"] ||
+        normalized["full name"];
 
       const username =
-        normalizedRow["username"] ||
-        normalizedRow["leetcode username"] ||
-        normalizedRow["leetcode"];
+        normalized["username"] ||
+        normalized["leetcode username"] ||
+        normalized["leetcode"];
 
       if (!name || !username) return;
       if (students.some(s => s.username === username)) return;
@@ -86,8 +93,7 @@ async function handleExcelUpload(e) {
     excelInput.value = ""; // allow re-upload same file
 
     renderStudentList();
-    await loadStats();
-    applyFilter();
+    await loadStats();     // ✅ always load
   };
 
   reader.readAsArrayBuffer(file);
@@ -99,12 +105,12 @@ async function loadStats() {
   showDataCont.innerHTML = "<p>Loading leaderboard...</p>";
 
   await Promise.all(
-    students.map(async s => {
-      if (s.stats) return;
+    students.map(async student => {
+      if (student.stats) return;
 
       try {
         const res = await fetch(
-          `https://alfa-leetcode-api.onrender.com/${s.username}/solved`
+          `https://alfa-leetcode-api.onrender.com/${student.username}/solved`
         );
         const data = await res.json();
 
@@ -112,23 +118,32 @@ async function loadStats() {
         const medium = data.mediumSolved || 0;
         const hard = data.hardSolved || 0;
 
-        s.stats = {
+        student.stats = {
           easy,
           medium,
           hard,
           totalSolved: easy + medium + hard
         };
       } catch {
-        s.stats = { easy: 0, medium: 0, hard: 0, totalSolved: 0 };
+        student.stats = {
+          easy: 0,
+          medium: 0,
+          hard: 0,
+          totalSolved: 0
+        };
       }
     })
   );
+
+  // 🔥 ALWAYS render after stats load
+  renderLeaderboard(students);
 }
 
-/* ================= STUDENT LIST ================= */
+/* ================= RENDER STUDENT LIST (LEFT) ================= */
 
 function renderStudentList() {
   showStudentContainer.innerHTML = "";
+
   students.forEach((s, i) => {
     const div = document.createElement("div");
     div.className = "student";
@@ -140,7 +155,7 @@ function renderStudentList() {
   });
 }
 
-/* ================= LEADERBOARD ================= */
+/* ================= RENDER LEADERBOARD ================= */
 
 function renderLeaderboard(list) {
   showDataCont.innerHTML = "";
@@ -148,6 +163,7 @@ function renderLeaderboard(list) {
   list.forEach((s, i) => {
     const div = document.createElement("div");
     div.className = "IndividualStudent";
+
     div.innerHTML = `
       <div>
         <p>#${i + 1}</p>
@@ -155,12 +171,13 @@ function renderLeaderboard(list) {
         <p>${s.username}</p>
       </div>
       <div>
-        <p>Total: ${s.stats.totalSolved}</p>
-        <p>Easy: ${s.stats.easy}</p>
-        <p>Medium: ${s.stats.medium}</p>
-        <p>Hard: ${s.stats.hard}</p>
+        <p>Total: ${s.stats?.totalSolved ?? 0}</p>
+        <p>Easy: ${s.stats?.easy ?? 0}</p>
+        <p>Medium: ${s.stats?.medium ?? 0}</p>
+        <p>Hard: ${s.stats?.hard ?? 0}</p>
       </div>
     `;
+
     showDataCont.appendChild(div);
   });
 }
@@ -168,12 +185,12 @@ function renderLeaderboard(list) {
 /* ================= FILTER ================= */
 
 function applyFilter() {
-  if (students.some(s => !s.stats)) return;
+  if (students.length === 0) return;
 
   const key = filterSelect.value;
 
   const sorted = [...students].sort(
-    (a, b) => b.stats[key] - a.stats[key]
+    (a, b) => (b.stats?.[key] || 0) - (a.stats?.[key] || 0)
   );
 
   renderLeaderboard(sorted);
